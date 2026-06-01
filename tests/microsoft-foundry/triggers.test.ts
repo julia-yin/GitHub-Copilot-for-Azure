@@ -25,6 +25,7 @@ describe(`${SKILL_NAME} - Trigger Tests`, () => {
       "How do I deploy an AI model from Microsoft Foundry catalog?",
       "Build a RAG application with Azure AI Foundry knowledge index",
       "Create an AI agent in Microsoft Foundry with web search",
+      "Add a tool to my Foundry agent",
       "Evaluate agent performance using Foundry evaluators",
       "Optimize my prompt for a Microsoft Foundry agent",
       "Improve my agent instructions in Azure AI Foundry",
@@ -54,7 +55,7 @@ describe(`${SKILL_NAME} - Trigger Tests`, () => {
     // RBAC-specific prompts that SHOULD trigger this skill
     const rbacTriggerPrompts: string[] = [
       "Grant Alice role assignment access to my Microsoft Foundry project",
-      "Assign Azure AI User role to a user in Foundry",
+      "Assign Foundry User role to a user in Foundry",
       "Make Bob a project manager in Azure AI Foundry",
       "Who has role assignment access to my Microsoft Foundry resource?",
       "Audit role assignments on my Foundry account",
@@ -79,6 +80,27 @@ describe(`${SKILL_NAME} - Trigger Tests`, () => {
     );
   });
 
+  describe("Should Trigger - Private Network Sub-Skill", () => {
+    // Prompts covering private-network sub-skill Q&A + deployment
+    const vnetTriggerPrompts: string[] = [
+      "How does Foundry VNet isolation work?",
+      "BYO VNet vs managed VNet in Foundry",
+      "Explain Foundry private endpoints",
+      "Deploy Foundry in a private VNet",
+      "Set up network isolation for my Foundry agents",
+      "Deploy Foundry with managed virtual network",
+    ];
+
+    test.each(vnetTriggerPrompts)(
+      'triggers on VNet prompt: "%s"',
+      (prompt) => {
+        const result = triggerMatcher.shouldTrigger(prompt);
+        expect(result.triggered).toBe(true);
+        expect(result.matchedKeywords.length).toBeGreaterThanOrEqual(2);
+      }
+    );
+  });
+
   describe("Should NOT Trigger", () => {
     // Prompts that should NOT trigger - completely unrelated topics
     const shouldNotTriggerPrompts: string[] = [
@@ -91,6 +113,9 @@ describe(`${SKILL_NAME} - Trigger Tests`, () => {
       "How do I write Python code?", // Generic programming
       "How do I configure a timer-based cron job in my web app?", // Use azure-functions
       "Host my static website on a cloud platform", // Use azure-create-app
+      "How do I create a virtual network for my web app?", // Generic Azure networking — no Foundry
+      "Set up VNet peering between two subscriptions", // Generic Azure networking
+      "Configure private endpoints for my Azure SQL database", // Private endpoints but not Foundry
     ];
 
     test.each(shouldNotTriggerPrompts)(
